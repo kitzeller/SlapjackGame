@@ -6,17 +6,17 @@ public class Player {
     private final int id;
     boolean eliminated;
 
-    public Player(int id){
+    public Player(int id) {
         this.id = id;
         this.hand = new Deck();
         this.eliminated = false;
     }
 
-    public void getCard(Card card){
+    public void getCard(Card card) {
         hand.pushCard(card);
     }
 
-    public Card placeCard(){
+    public Card placeCard() {
         return hand.popCard();
     }
 
@@ -46,7 +46,7 @@ public class Player {
 
 
     public String getName() {
-        switch(id){
+        switch (id) {
             case 0:
                 return "You";
             case 1:
@@ -60,7 +60,7 @@ public class Player {
         }
     }
 
-    public void shuffleHand(){
+    public void shuffleHand() {
         hand.shuffle();
     }
 }

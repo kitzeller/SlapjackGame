@@ -4,21 +4,34 @@ import java.util.*;
 
 public class Slapjack {
 
+    /**
+     *  Game Settings
+     */
     final private int playerCount;
     final private List<Player> players;
     private LinkedList<Player> playerOrder;
-    private boolean customJacks;
     private List<String> jacks;
     private Deck mainDeck;
+
+    /**
+     *  Flags
+     */
     private boolean gameOver;
     private boolean timerFlag;
     private boolean AIMode;
 
+    /**
+     *  Helper Variables
+     */
+    private Scanner scanner;
+    private Player currentPlayer;
+    private Card card;
 
-    Scanner scanner;
-    Player currentPlayer;
-    Card card;
-
+    /**
+     * @param playerCount the number of players
+     * @param players the list of players
+     * @param jacks the list of special 'Jacks'
+     */
     public Slapjack(int playerCount, List<Player> players, List<String> jacks) {
         this.playerCount = playerCount;
         this.jacks = jacks;
@@ -28,15 +41,9 @@ public class Slapjack {
         this.playerOrder = new LinkedList<>();
     }
 
-    public Slapjack(int playerCount, List<Player> players, boolean jacks) {
-        this.playerCount = playerCount;
-        this.customJacks = jacks;
-        this.mainDeck = new Deck();
-        this.gameOver = false;
-        this.players = players;
-        this.playerOrder = new LinkedList<>();
-    }
-
+    /**
+     *  Play the game
+     */
     public void play() {
         scanner = new Scanner(System.in);
         mainDeck.populate();
@@ -129,7 +136,7 @@ public class Slapjack {
                     System.out.println("Player " + players.get(n).getName() + " gained " + mainDeck.getSize() + " cards");
                     transferMainStack(players.get(n).getId());
 
-                    if (!playerOrder.contains(players.get(n))){
+                    if (!playerOrder.contains(players.get(n))) {
                         playerOrder.add(players.get(n));
                     }
 
@@ -160,7 +167,7 @@ public class Slapjack {
                 System.out.println("Player " + players.get(n).getName() + " took the " + card.getRank());
                 System.out.println("Player " + players.get(n).getName() + " gained " + mainDeck.getSize() + " cards");
                 transferMainStack(players.get(n).getId());
-                if (!playerOrder.contains(players.get(n))){
+                if (!playerOrder.contains(players.get(n))) {
                     playerOrder.add(players.get(n));
                 }
                 checkWinningCondition();
@@ -173,7 +180,7 @@ public class Slapjack {
                     System.out.println("Player " + players.get(n).getName() + " took the " + card.getRank());
                     System.out.println("Player " + players.get(n).getName() + " gained " + mainDeck.getSize() + " cards");
                     transferMainStack(players.get(n).getId());
-                    if (!playerOrder.contains(players.get(n))){
+                    if (!playerOrder.contains(players.get(n))) {
                         playerOrder.add(players.get(n));
                     }
                     checkWinningCondition();
@@ -198,15 +205,22 @@ public class Slapjack {
         }
     }
 
+    /**
+     * @param rank card rank
+     * @return whether or not it is a special card
+     */
     private boolean isAJack(String rank) {
         for (int i = 0; i < jacks.size(); i++) {
-            if (rank.equals(jacks.get(i))){
+            if (rank.equals(jacks.get(i))) {
                 return true;
             }
         }
         return false;
     }
 
+    /**
+     *  Deal the cards
+     */
     private void dealCards() {
         int count = 0;
         while (!mainDeck.isEmpty()) {
@@ -220,6 +234,9 @@ public class Slapjack {
         }
     }
 
+    /**
+     *  Prompt User with AI Mode
+     */
     private void promptAIMode() {
         System.out.println("Watch the AI finish the game? Enter 'yes' or 'no'!");
         scanner = new Scanner(System.in);
@@ -231,6 +248,9 @@ public class Slapjack {
         }
     }
 
+    /**
+     *  Check
+     */
     private void checkWinningCondition() {
         for (int i = 0; i < playerCount; i++) {
             if (players.get(i).hasAllCards()) {
@@ -240,6 +260,9 @@ public class Slapjack {
         }
     }
 
+    /**
+     * @param playerId
+     */
     private void transferMainStack(int playerId) {
         Player player = players.get(playerId);
         while (!mainDeck.isEmpty()) {
@@ -249,6 +272,9 @@ public class Slapjack {
         player.shuffleHand();
     }
 
+    /**
+     * @return next player in 'Queue'
+     */
     private Player getNextPlayer() {
         Player next = playerOrder.remove();
         if (!next.outOfCards()) {
@@ -256,29 +282,4 @@ public class Slapjack {
         }
         return next;
     }
-
-    public int getPlayerCount() {
-        return playerCount;
-    }
-
-    public Deck getMainDeck() {
-        return mainDeck;
-    }
-
-    public void setMainDeck(Deck mainDeck) {
-        this.mainDeck = mainDeck;
-    }
-
-    public boolean isCustomJacks() {
-        return customJacks;
-    }
-
-    public void setCustomJacks(boolean customJacks) {
-        this.customJacks = customJacks;
-    }
-
-    public List<String> getJacks() {
-        return jacks;
-    }
-
 }

@@ -26,7 +26,7 @@ public class Card {
         this.rank = rank;
     }
 
-    public String getName(){
+    public String getName() {
         return this.rank + " of " + this.suit;
     }
 
