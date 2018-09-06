@@ -50,11 +50,11 @@ public class Player {
             case 0:
                 return "You";
             case 1:
-                return "Two";
+                return "Player Two";
             case 2:
-                return "Three";
+                return "Player Three";
             case 3:
-                return "Four";
+                return "Player Four";
             default:
                 return "";
         }

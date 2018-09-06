@@ -3,16 +3,23 @@ package com.kit;
 import java.util.Collections;
 import java.util.Stack;
 
+
+/**
+ *
+ * A "standard" deck of playing cards consists of 52 Cards in each of the 4 suits of Spades, Hearts, Diamonds, and Clubs.
+ * Each suit contains 13 cards: Ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, Jack, Queen, King.
+ *
+ */
 public class Deck {
 
     private Stack<Card> cardStack;
 
     public static final int DECK_SIZE = 52;
-    public static final String[] SUITS = {
+    private static final String[] SUITS = {
             "Clubs", "Diamonds", "Hearts", "Spades"
     };
 
-    public static final String[] RANKS = {
+    private static final String[] RANKS = {
             "2", "3", "4", "5", "6", "7", "8", "9", "10",
             "Jack", "Queen", "King", "Ace"
     };

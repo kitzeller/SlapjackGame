@@ -5,7 +5,7 @@ import java.util.*;
 public class Slapjack {
 
     /**
-     *  Game Settings
+     * Game Settings
      */
     final private int playerCount;
     final private List<Player> players;
@@ -14,14 +14,15 @@ public class Slapjack {
     private Deck mainDeck;
 
     /**
-     *  Flags
+     * Flags
      */
     private boolean gameOver;
+    private boolean eliminated;
     private boolean timerFlag;
     private boolean AIMode;
 
     /**
-     *  Helper Variables
+     * Helper Variables
      */
     private Scanner scanner;
     private Player currentPlayer;
@@ -29,8 +30,8 @@ public class Slapjack {
 
     /**
      * @param playerCount the number of players
-     * @param players the list of players
-     * @param jacks the list of special 'Jacks'
+     * @param players     the list of players
+     * @param jacks       the list of special 'Jacks'
      */
     public Slapjack(int playerCount, List<Player> players, List<String> jacks) {
         this.playerCount = playerCount;
@@ -39,13 +40,16 @@ public class Slapjack {
         this.gameOver = false;
         this.players = players;
         this.playerOrder = new LinkedList<>();
+        this.scanner = new Scanner(System.in);
+
     }
 
     /**
-     *  Play the game
+     * Play the game
+     *
+     * @return game ended
      */
-    public void play() {
-        scanner = new Scanner(System.in);
+    public boolean play() {
         mainDeck.populate();
         System.out.println("Shuffling cards...");
         mainDeck.shuffle();
@@ -61,11 +65,9 @@ public class Slapjack {
         String input = null;
         timerFlag = false;
 
-
         while (!gameOver) {
             while (!isAJack(card.getRank())) {
-                checkWinningCondition();
-
+                if (checkWinningCondition()) return true;
                 if (timerFlag) {
                     timerFlag = false;
                 } else if (AIMode) {
@@ -90,14 +92,14 @@ public class Slapjack {
                                 }
                             }
                         } else {
-                            System.out.println("That wasn't a slapjack! You must give a card to Player " + currentPlayer.getName());
+                            System.out.println("That wasn't a slapjack! You must give a card to " + currentPlayer.getName());
                             currentPlayer.getCard(players.get(0).placeCard());
                         }
                         System.out.println("Press x to continue");
                         scanner.nextLine();
                     } else {
                         System.out.println("That wasn't a slapjack! You have no more cards and are eliminated!");
-                        promptAIMode();
+                        if (!promptAIMode()) return true;
                     }
                 }
 
@@ -105,26 +107,13 @@ public class Slapjack {
                 card = currentPlayer.placeCard();
 
                 if (card == null) {
-                    if (currentPlayer.getId() == 0) {
-                        System.out.println("You are out of cards!");
-                    } else {
-                        System.out.println("Player " + currentPlayer.getName() + " is out of cards!");
-                    }
-
-                    checkWinningCondition();
-
+                    System.out.println(currentPlayer.getName() + " ran out of cards!");
+                    if (checkWinningCondition()) return true;
                     card = new Card("dummy", "dummy");
                     continue;
                 }
-
                 mainDeck.pushCard(card);
-
-                if (currentPlayer.getId() != 0) {
-                    System.out.println("Player " + currentPlayer.getName() + " placed " + card.getName());
-                } else {
-                    System.out.println("You placed " + card.getName());
-                }
-
+                System.out.println(currentPlayer.getName() + " placed " + card.getName());
             }
 
             TimerTask task = new TimerTask() {
@@ -132,19 +121,15 @@ public class Slapjack {
                     System.out.println("Too Slow");
                     Random rand = new Random();
                     int n = rand.nextInt(playerCount - 1) + 1;
-                    System.out.println("Player " + players.get(n).getName() + " took the " + card.getRank());
-                    System.out.println("Player " + players.get(n).getName() + " gained " + mainDeck.getSize() + " cards");
+                    System.out.println(players.get(n).getName() + " took the " + card.getRank());
+                    System.out.println(players.get(n).getName() + " gained " + mainDeck.getSize() + " cards");
                     transferMainStack(players.get(n).getId());
-
                     if (!playerOrder.contains(players.get(n))) {
                         playerOrder.add(players.get(n));
                     }
-
-                    checkWinningCondition();
-
                     if (players.get(0).outOfCards()) {
                         System.out.println("You are out of cards and didn't manage to slap the jack! Game Over.");
-                        promptAIMode();
+                        eliminated = true;
                     } else {
                         System.out.println("Press x to continue");
                         timerFlag = true;
@@ -155,55 +140,57 @@ public class Slapjack {
             if (!AIMode) {
                 Timer timer = new Timer();
                 timer.schedule(task, 3 * 1000);
-
                 input = scanner.nextLine();
-
                 timer.cancel();
+            }
+            if (checkWinningCondition()) return true;
+            if (eliminated) {
+                if (!promptAIMode()) return true;
             }
 
             if (AIMode) {
                 Random rand = new Random();
                 int n = rand.nextInt(playerCount - 1) + 1;
-                System.out.println("Player " + players.get(n).getName() + " took the " + card.getRank());
-                System.out.println("Player " + players.get(n).getName() + " gained " + mainDeck.getSize() + " cards");
+                System.out.println(players.get(n).getName() + " took the " + card.getRank());
+                System.out.println(players.get(n).getName() + " gained " + mainDeck.getSize() + " cards");
                 transferMainStack(players.get(n).getId());
                 if (!playerOrder.contains(players.get(n))) {
                     playerOrder.add(players.get(n));
                 }
-                checkWinningCondition();
+                if (checkWinningCondition()) return true;
             } else if (timerFlag) {
                 // do nothing
             } else {
                 if (!input.equals("z")) {
                     Random rand = new Random();
                     int n = rand.nextInt(playerCount - 1) + 1;
-                    System.out.println("Player " + players.get(n).getName() + " took the " + card.getRank());
-                    System.out.println("Player " + players.get(n).getName() + " gained " + mainDeck.getSize() + " cards");
+                    System.out.println(players.get(n).getName() + " took the " + card.getRank());
+                    System.out.println(players.get(n).getName() + " gained " + mainDeck.getSize() + " cards");
                     transferMainStack(players.get(n).getId());
                     if (!playerOrder.contains(players.get(n))) {
                         playerOrder.add(players.get(n));
                     }
-                    checkWinningCondition();
+                    if (checkWinningCondition()) return true;
 
                     if (players.get(0).outOfCards()) {
                         System.out.println("You are out of cards and didn't manage to slap the jack! Game Over.");
-                        promptAIMode();
+                        if (!promptAIMode()) return true;
                     }
 
                 } else {
                     System.out.println("You took the " + card.getRank());
                     System.out.println("You gained " + mainDeck.getSize() + " cards");
                     transferMainStack(0);
-                    checkWinningCondition();
+                    if (checkWinningCondition()) return true;
 
                 }
-
-                System.out.println("Press x to continue");
-
+                System.out.println("Enter x to continue");
             }
             card = new Card("dummy", "dummy");
         }
+        return true;
     }
+
 
     /**
      * @param rank card rank
@@ -219,7 +206,7 @@ public class Slapjack {
     }
 
     /**
-     *  Deal the cards
+     * Deal the cards
      */
     private void dealCards() {
         int count = 0;
@@ -235,33 +222,49 @@ public class Slapjack {
     }
 
     /**
-     *  Prompt User with AI Mode
+     * Prompt User with AI Mode (watch the game after they lose)
+     *
+     * @return AI Mode enabled
      */
-    private void promptAIMode() {
+    private boolean promptAIMode() {
         System.out.println("Watch the AI finish the game? Enter 'yes' or 'no'!");
-        scanner = new Scanner(System.in);
-        if (scanner.nextLine().equals("yes")) {
+        String input;
+
+        do {
+            input = scanner.nextLine();
+            if (!input.equals("yes") && !input.equals("no")) {
+                System.out.println("Enter 'yes' or 'no'!");
+            }
+        } while (!input.equals("yes") && !input.equals("no"));
+
+        if (input.equals("yes")) {
             AIMode = true;
+            return true;
         } else {
             System.out.println("Thanks for playing. Bye now!");
-            System.exit(0);
+            return false;
         }
     }
 
     /**
-     *  Check
+     * Check if any players have all cards
+     *
+     * @return if a player has won
      */
-    private void checkWinningCondition() {
+    public boolean checkWinningCondition() {
         for (int i = 0; i < playerCount; i++) {
             if (players.get(i).hasAllCards()) {
-                System.out.println("Player " + players.get(i).getName() + " won!");
-                System.exit(0);
+                System.out.println(players.get(i).getName() + " won!");
+                return true;
             }
         }
+        return false;
     }
 
     /**
-     * @param playerId
+     * Transfer the contents of the main stack to a player
+     *
+     * @param playerId the winning player
      */
     private void transferMainStack(int playerId) {
         Player player = players.get(playerId);
@@ -273,7 +276,7 @@ public class Slapjack {
     }
 
     /**
-     * @return next player in 'Queue'
+     * @return next player in line
      */
     private Player getNextPlayer() {
         Player next = playerOrder.remove();
