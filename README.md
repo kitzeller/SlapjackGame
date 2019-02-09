@@ -1,5 +1,4 @@
 # Slapjack Game Design Document
-Terminal Card Game made for Kleiner Perkins Fellowship Application.
 
 
 **1. Instructions for running your code and any tests you may have written**
